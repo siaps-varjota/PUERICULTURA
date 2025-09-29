@@ -121,12 +121,15 @@
             return dateString; // Retorna o original se não for DD/MM/YYYY
         }
 
-        // Função para converter data ISO para DD/MM/YYYY
+        // Função para converter data ISO para DD/MM/YYYY com zeros
         function toLocaleDate(dateString) {
             if (!dateString) return '';
-            const date = new Date(dateString);
-            if (!isValidDate(date)) return '';
-            return date.toLocaleDateString('pt-BR');
+            const parts = dateString.split('-');
+            if (parts.length !== 3) return '';
+            const year = parts[0];
+            const month = parts[1].padStart(2, '0');
+            const day = parts[2].padStart(2, '0');
+            return `${day}/${month}/${year}`;
         }
 
         // Função para carregar e processar o CSV
@@ -210,12 +213,15 @@
                         const newValue = this.value; // Valor do input (YYYY-MM-DD)
                         const parentCell = this.parentElement;
                         if (parentCell) {
+                            // Remover o input explicitamente
+                            parentCell.removeChild(this);
                             if (newValue) {
                                 // Converter para DD/MM/YYYY para exibição
-                                parentCell.textContent = toLocaleDate(newValue);
+                                const formattedDate = toLocaleDate(newValue);
+                                parentCell.textContent = formattedDate;
                                 try {
                                     parentCell.setAttribute('data-date', newValue);
-                                    console.log(`Data salva: ${newValue} (exibida como ${toLocaleDate(newValue)})`);
+                                    console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
                                 } catch (e) {
                                     console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
                                 }
