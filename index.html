@@ -98,37 +98,59 @@
         // Função para validar se o texto é uma data válida
         function isValidDate(dateString) {
             if (!dateString || typeof dateString !== 'string') return false;
-            // Tenta interpretar como DD/MM/YYYY
-            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-            if (regex.test(dateString)) {
+            
+            // Tenta interpretar como DD/MM/YYYY ou DD/MM/YY
+            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+            if (regexDDMMYYYY.test(dateString)) {
                 const [day, month, year] = dateString.split('/').map(Number);
+                const fullYear = year < 100 ? 2000 + year : year; // Converte YY para YYYY
+                const date = new Date(fullYear, month - 1, day);
+                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === fullYear;
+            }
+            
+            // Tenta interpretar como YYYY-MM-DD (formato do <input type="date">)
+            const regexYYYYMMDD = /^(\d{4})-(\d{2})-(\d{2})$/;
+            if (regexYYYYMMDD.test(dateString)) {
+                const [year, month, day] = dateString.split('-').map(Number);
                 const date = new Date(year, month - 1, day);
                 return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
             }
+            
             // Tenta como data genérica
             const date = new Date(dateString);
             return date instanceof Date && !isNaN(date);
         }
 
-        // Função para converter data DD/MM/YYYY para formato ISO (YYYY-MM-DD)
+        // Função para converter data DD/MM/YYYY, DD/MM/YY ou YYYY-MM-DD para formato ISO (YYYY-MM-DD)
         function toISODate(dateString) {
             if (!dateString || typeof dateString !== 'string') return '';
-            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-            if (regex.test(dateString)) {
-                const [day, month, year] = dateString.split('/');
-                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            
+            // Tenta DD/MM/YYYY ou DD/MM/YY
+            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+            if (regexDDMMYYYY.test(dateString)) {
+                const [day, month, year] = dateString.split('/').map(Number);
+                const fullYear = year < 100 ? 2000 + year : year; // Converte YY para YYYY
+                return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             }
-            return dateString; // Retorna o original se não for DD/MM/YYYY
+            
+            // Tenta YYYY-MM-DD
+            if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateString)) {
+                return dateString; // Já está no formato ISO
+            }
+            
+            return ''; // Retorna vazio se não for reconhecido
         }
 
-        // Função para converter data ISO para DD/MM/YYYY com zeros
+        // Função para converter data ISO (YYYY-MM-DD) para DD/MM/YY
         function toLocaleDate(dateString) {
-            if (!dateString) return '';
-            const parts = dateString.split('-');
-            if (parts.length !== 3) return '';
-            const year = parts[0];
-            const month = parts[1].padStart(2, '0');
-            const day = parts[2].padStart(2, '0');
+            if (!dateString || !isValidDate(dateString)) {
+                console.warn('toLocaleDate: Data inválida ou vazia:', dateString);
+                return '';
+            }
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2); // Últimos 2 dígitos do ano
             return `${day}/${month}/${year}`;
         }
 
@@ -197,7 +219,7 @@
                     // Evitar múltiplos inputs na mesma célula
                     if (this.querySelector('input')) return;
 
-                    // Obter o valor atual, priorizando data-date ou texto da célula
+                    // Obter o valor atual
                     const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
                     const input = document.createElement('input');
                     input.type = 'date';
@@ -212,36 +234,44 @@
                     input.addEventListener('blur', function() {
                         const newValue = this.value; // Valor do input (YYYY-MM-DD)
                         const parentCell = this.parentElement;
-                        if (parentCell) {
-                            // Remover o input explicitamente
+                        if (!parentCell) {
+                            console.warn('Erro: parentElement não encontrado ao salvar data.');
+                            return;
+                        }
+
+                        // Remover o input
+                        try {
                             parentCell.removeChild(this);
-                            if (newValue) {
-                                // Converter para DD/MM/YYYY para exibição
-                                const formattedDate = toLocaleDate(newValue);
+                        } catch (e) {
+                            console.warn('Erro ao remover input:', e.message);
+                        }
+
+                        if (newValue && isValidDate(newValue)) {
+                            // Converter para DD/MM/YY para exibição
+                            const formattedDate = toLocaleDate(newValue);
+                            if (formattedDate) {
                                 parentCell.textContent = formattedDate;
-                                try {
-                                    parentCell.setAttribute('data-date', newValue);
-                                    console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
-                                } catch (e) {
-                                    console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
-                                }
+                                parentCell.setAttribute('data-date', newValue);
+                                console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
                             } else {
-                                // Caso o input esteja vazio, limpar a célula
+                                console.warn('Erro: Falha ao formatar data:', newValue);
                                 parentCell.textContent = '';
                                 parentCell.setAttribute('data-date', '');
-                                console.log('Data limpa');
                             }
                         } else {
-                            console.warn('Erro: parentElement não encontrado ao salvar data.');
+                            // Caso o input esteja vazio ou inválido, limpar a célula
+                            parentCell.textContent = '';
+                            parentCell.setAttribute('data-date', '');
+                            console.log('Data limpa ou inválida:', newValue);
                         }
-                    });
+                    }, { once: true });
 
                     // Salvar a data ao pressionar Enter
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             this.blur();
                         }
-                    });
+                    }, { once: true });
                 });
             });
         }
