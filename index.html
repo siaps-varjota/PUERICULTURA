@@ -1,316 +1,230 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista de Dados</title>
-<style>
-body {
-font-family: Arial, sans-serif;
-margin: 20px;
-background-color: #f4f4f9;
-}
-h1 {
-text-align: center;
-color: #333;
-}
-table {
-width: 100%;
-border-collapse: collapse;
-margin: 20px 0;
-background-color: #fff;
-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-th, td {
-padding: 12px;
-text-align: left;
-border: 1px solid #ddd;
-}
-/* Centralizar colunas da 5ª até a última (índices 5 a 17) */
-th:nth-child(n+5), td:nth-child(n+5) {
-text-align: center;
-}
-/* Estilo para células editáveis */
-td.editable {
-cursor: pointer;
-position: relative;
-}
-td.editable:hover {
-background-color: #e0f7fa;
-}
-/* Estilo para o input de data */
-td.editable input[type="date"] {
-width: 100%;
-padding: 8px;
-border: none;
-outline: none;
-font-size: 16px;
-box-sizing: border-box;
-}
-th {
-background-color: #4CAF50;
-color: white;
-}
-tr:nth-child(even) {
-background-color: #f2f2f2;
-}
-tr:hover {
-background-color: #ddd;
-}
-@media screen and (max-width: 600px) {
-table {
-display: block;
-overflow-x: auto;
-}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Dados</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th:nth-child(n+5), td:nth-child(n+5) {
+      text-align: center;
+    }
+    td.editable {
+      cursor: pointer;
+      position: relative;
+    }
+    td.editable:hover {
+      background-color: #e0f7fa;
+    }
+    td.editable input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    tr:hover {
+      background-color: #ddd;
+    }
+    @media screen and (max-width: 600px) {
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Lista de Dados</h1>
-<table id="data-table">
-<thead>
-<tr>
-<th>NOME COMPLETO</th>
-<th>D.N</th>
-<th>IDADE</th>
-<th>SEXO</th>
-<th>ACS</th>
-<th>VISITA NEO-NATAL</th>
-<th>1 MÊS</th>
-<th>2 MESES</th>
-<th>3 MESES</th>
-<th>4 MESES</th>
-<th>6 MESES</th>
-<th>9 MESES</th>
-<th>12 MESES</th>
-<th>18 MESES</th>
-<th>24 MESES</th>
-<th>3 ANOS</th>
-<th>EM DIA</th>
-</tr>
-</thead>
-<tbody id="table-body">
-<!-- Dados serão inseridos aqui via JavaScript -->
-</tbody>
-</table>
+  <h1>Lista de Dados</h1>
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>NOME COMPLETO</th>
+        <th>D.N</th>
+        <th>IDADE</th>
+        <th>SEXO</th>
+        <th>ACS</th>
+        <th>VISITA NEO-NATAL</th>
+        <th>1 MÊS</th>
+        <th>2 MESES</th>
+        <th>3 MESES</th>
+        <th>4 MESES</th>
+        <th>6 MESES</th>
+        <th>9 MESES</th>
+        <th>12 MESES</th>
+        <th>18 MESES</th>
+        <th>24 MESES</th>
+        <th>3 ANOS</th>
+        <th>EM DIA</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
 
-<script>
-// Função para validar se o texto é uma data válida
-function isValidDate(dateString) {
-if (!dateString || typeof dateString !== 'string') return false;
-            // Tenta interpretar como DD/MM/YYYY
-            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-            if (regex.test(dateString)) {
-            
-            // Tenta interpretar como DD/MM/YYYY ou DD/MM/YY
-            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
-            if (regexDDMMYYYY.test(dateString)) {
-const [day, month, year] = dateString.split('/').map(Number);
-                const fullYear = year < 100 ? 2000 + year : year; // Converte YY para YYYY
-                const date = new Date(fullYear, month - 1, day);
-                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === fullYear;
+  <script>
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOUP-8S0wpcTU97tn_MhDerYkPNNmLITOO_3VKkmfQ9R1OvIbKulOh1GTRjGXo_IBX-keRbW-FZFaZ/pub?gid=713509742&single=true&output=csv';
+
+    // 👉 TROQUE PELA SUA URL DO APPS SCRIPT
+    const apiUrl = "https://script.google.com/macros/s/AKfycbwu0cMvDw3Luq687YwSAVTN_-ap98GUynAS8pccduPmLBNsGvGELEQnqVyKRVAH_uej/exec";
+
+    function isValidDate(dateString) {
+      if (!dateString || typeof dateString !== 'string') return false;
+      const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+      if (regexDDMMYYYY.test(dateString)) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        const fullYear = year < 100 ? 2000 + year : year;
+        const date = new Date(fullYear, month - 1, day);
+        return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === fullYear;
+      }
+      const regexYYYYMMDD = /^(\d{4})-(\d{2})-(\d{2})$/;
+      if (regexYYYYMMDD.test(dateString)) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+      }
+      const date = new Date(dateString);
+      return date instanceof Date && !isNaN(date);
+    }
+
+    function toISODate(dateString) {
+      if (!dateString || typeof dateString !== 'string') return '';
+      const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+      if (regexDDMMYYYY.test(dateString)) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        const fullYear = year < 100 ? 2000 + year : year;
+        return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      }
+      if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateString)) {
+        return dateString;
+      }
+      return '';
+    }
+
+    function toLocaleDate(dateString) {
+      if (!dateString || !isValidDate(dateString)) return '';
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(-2);
+      return `${day}/${month}/${year}`;
+    }
+
+    async function loadCSV() {
+      try {
+        const response = await fetch(csvUrl);
+        const csvText = await response.text();
+        const rows = csvText.split('\n').map(row => row.split(','));
+        const dataRows = rows.slice(10);
+        const tableBody = document.getElementById('table-body');
+        tableBody.innerHTML = '';
+
+        dataRows.forEach((row, rowIndex) => {
+          const rowData = row.slice(3, 20);
+          if (rowData.length >= 17) {
+            const tr = document.createElement('tr');
+            rowData.forEach((cell, index) => {
+              const td = document.createElement('td');
+              td.textContent = cell || '';
+              if (index >= 5 && index <= 15) {
+                td.classList.add('editable');
+                if (cell && isValidDate(cell)) {
+                  td.setAttribute('data-date', toISODate(cell));
+                }
+              }
+              tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+          }
+        });
+
+        addEditableEvents();
+      } catch (error) {
+        console.error('Erro ao carregar o CSV:', error);
+      }
+    }
+
+    function addEditableEvents() {
+      const editableCells = document.querySelectorAll('td.editable');
+      editableCells.forEach((cell, cellIndex) => {
+        cell.addEventListener('click', function () {
+          if (this.querySelector('input')) return;
+          const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
+          const input = document.createElement('input');
+          input.type = 'date';
+          input.value = currentValue;
+          this.textContent = '';
+          this.appendChild(input);
+          input.focus();
+
+          input.addEventListener('blur', function () {
+            const newValue = this.value;
+            const parentCell = this.parentElement;
+            const rowIndex = parentCell.parentElement.rowIndex + 10; // linha no Sheets
+            const colIndex = cellIndex + 4; // coluna no Sheets
+
+            parentCell.removeChild(this);
+
+            if (newValue && isValidDate(newValue)) {
+              const formattedDate = toLocaleDate(newValue);
+              parentCell.textContent = formattedDate;
+              parentCell.setAttribute('data-date', newValue);
+
+              // 👉 Salvar no Google Sheets
+              fetch(apiUrl, {
+                method: "POST",
+                body: JSON.stringify({
+                  linha: rowIndex,
+                  coluna: colIndex,
+                  valor: newValue
+                }),
+                headers: { "Content-Type": "application/json" }
+              })
+                .then(r => r.text())
+                .then(res => console.log("Salvo no Sheets:", res))
+                .catch(err => console.error("Erro ao salvar:", err));
+
+            } else {
+              parentCell.textContent = '';
+              parentCell.setAttribute('data-date', '');
             }
-            
-            // Tenta interpretar como YYYY-MM-DD (formato do <input type="date">)
-            const regexYYYYMMDD = /^(\d{4})-(\d{2})-(\d{2})$/;
-            if (regexYYYYMMDD.test(dateString)) {
-                const [year, month, day] = dateString.split('-').map(Number);
-const date = new Date(year, month - 1, day);
-return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
-}
-            
-// Tenta como data genérica
-const date = new Date(dateString);
-return date instanceof Date && !isNaN(date);
-}
+          }, { once: true });
 
-        // Função para converter data DD/MM/YYYY para formato ISO (YYYY-MM-DD)
-        // Função para converter data DD/MM/YYYY, DD/MM/YY ou YYYY-MM-DD para formato ISO (YYYY-MM-DD)
-function toISODate(dateString) {
-if (!dateString || typeof dateString !== 'string') return '';
-            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-            if (regex.test(dateString)) {
-                const [day, month, year] = dateString.split('/');
-                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            
-            // Tenta DD/MM/YYYY ou DD/MM/YY
-            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
-            if (regexDDMMYYYY.test(dateString)) {
-                const [day, month, year] = dateString.split('/').map(Number);
-                const fullYear = year < 100 ? 2000 + year : year; // Converte YY para YYYY
-                return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            }
-            
-            // Tenta YYYY-MM-DD
-            if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateString)) {
-                return dateString; // Já está no formato ISO
-}
-            return dateString; // Retorna o original se não for DD/MM/YYYY
-            
-            return ''; // Retorna vazio se não for reconhecido
-}
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') this.blur();
+          });
+        });
+      });
+    }
 
-        // Função para converter data ISO para DD/MM/YYYY com zeros
-        // Função para converter data ISO (YYYY-MM-DD) para DD/MM/YY
-function toLocaleDate(dateString) {
-            if (!dateString) return '';
-            const parts = dateString.split('-');
-            if (parts.length !== 3) return '';
-            const year = parts[0];
-            const month = parts[1].padStart(2, '0');
-            const day = parts[2].padStart(2, '0');
-            if (!dateString || !isValidDate(dateString)) {
-                console.warn('toLocaleDate: Data inválida ou vazia:', dateString);
-                return '';
-            }
-            const date = new Date(dateString);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear().toString().slice(-2); // Últimos 2 dígitos do ano
-return `${day}/${month}/${year}`;
-}
-
-// Função para carregar e processar o CSV
-async function loadCSV() {
-const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOUP-8S0wpcTU97tn_MhDerYkPNNmLITOO_3VKkmfQ9R1OvIbKulOh1GTRjGXo_IBX-keRbW-FZFaZ/pub?gid=713509742&single=true&output=csv';
-
-try {
-const response = await fetch(csvUrl);
-const csvText = await response.text();
-const rows = csvText.split('\n').map(row => row.split(','));
-
-// A partir da linha 10 (índice 9) e colunas D a T (índice 3 a 19)
-const dataRows = rows.slice(10); // Dados a partir da linha 11
-
-const tableBody = document.getElementById('table-body');
-if (!tableBody) {
-console.error('Elemento table-body não encontrado.');
-return;
-}
-tableBody.innerHTML = ''; // Limpa o corpo da tabela
-
-dataRows.forEach((row, rowIndex) => {
-const rowData = row.slice(3, 20); // Colunas D a T
-if (rowData.length >= 17) { // Garante que a linha tem pelo menos 17 colunas
-const tr = document.createElement('tr');
-rowData.forEach((cell, index) => {
-const td = document.createElement('td');
-td.textContent = cell || ''; // Garante que a célula não seja undefined
-// Tornar colunas 6 a 16 (índices 5 a 15) editáveis
-if (index >= 5 && index <= 15) {
-td.classList.add('editable');
-// Inicializar com o valor como data, se for uma data válida
-if (cell && isValidDate(cell)) {
-try {
-td.setAttribute('data-date', toISODate(cell));
-} catch (e) {
-console.warn(`Erro ao definir data-date na linha ${rowIndex + 11}, coluna ${index + 4}:`, cell);
-}
-}
-}
-tr.appendChild(td);
-});
-tableBody.appendChild(tr);
-} else {
-console.warn(`Linha ${rowIndex + 11} ignorada: contém menos de 17 colunas.`);
-}
-});
-
-// Adicionar eventos de edição às células editáveis
-addEditableEvents();
-} catch (error) {
-console.error('Erro ao carregar o CSV:', error);
-const tableBody = document.getElementById('table-body');
-if (tableBody) {
-tableBody.innerHTML = '<tr><td colspan="17">Erro ao carregar os dados.</td></tr>';
-}
-}
-}
-
-// Função para adicionar eventos de edição
-function addEditableEvents() {
-const editableCells = document.querySelectorAll('td.editable');
-editableCells.forEach(cell => {
-cell.addEventListener('click', function() {
-// Evitar múltiplos inputs na mesma célula
-if (this.querySelector('input')) return;
-
-                    // Obter o valor atual, priorizando data-date ou texto da célula
-                    // Obter o valor atual
-const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
-const input = document.createElement('input');
-input.type = 'date';
-input.value = currentValue;
-
-// Limpar a célula e adicionar o input
-this.textContent = '';
-this.appendChild(input);
-input.focus();
-
-// Salvar a data quando o input perder o foco
-input.addEventListener('blur', function() {
-const newValue = this.value; // Valor do input (YYYY-MM-DD)
-const parentCell = this.parentElement;
-                        if (parentCell) {
-                            // Remover o input explicitamente
-                        if (!parentCell) {
-                            console.warn('Erro: parentElement não encontrado ao salvar data.');
-                            return;
-                        }
-
-                        // Remover o input
-                        try {
-parentCell.removeChild(this);
-                            if (newValue) {
-                                // Converter para DD/MM/YYYY para exibição
-                                const formattedDate = toLocaleDate(newValue);
-                        } catch (e) {
-                            console.warn('Erro ao remover input:', e.message);
-                        }
-
-                        if (newValue && isValidDate(newValue)) {
-                            // Converter para DD/MM/YY para exibição
-                            const formattedDate = toLocaleDate(newValue);
-                            if (formattedDate) {
-parentCell.textContent = formattedDate;
-                                try {
-                                    parentCell.setAttribute('data-date', newValue);
-                                    console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
-                                } catch (e) {
-                                    console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
-                                }
-                                parentCell.setAttribute('data-date', newValue);
-                                console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
-} else {
-                                // Caso o input esteja vazio, limpar a célula
-                                console.warn('Erro: Falha ao formatar data:', newValue);
-parentCell.textContent = '';
-parentCell.setAttribute('data-date', '');
-                                console.log('Data limpa');
-}
-} else {
-                            console.warn('Erro: parentElement não encontrado ao salvar data.');
-                            // Caso o input esteja vazio ou inválido, limpar a célula
-                            parentCell.textContent = '';
-                            parentCell.setAttribute('data-date', '');
-                            console.log('Data limpa ou inválida:', newValue);
-}
-                    });
-                    }, { once: true });
-
-// Salvar a data ao pressionar Enter
-input.addEventListener('keydown', function(e) {
-if (e.key === 'Enter') {
-this.blur();
-}
-                    });
-                    }, { once: true });
-});
-});
-}
-
-// Carrega o CSV quando a página for carregada
-window.onload = loadCSV;
-</script>
+    window.onload = loadCSV;
+  </script>
 </body>
 </html>
