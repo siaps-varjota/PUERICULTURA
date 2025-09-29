@@ -194,26 +194,36 @@
                     // Evitar múltiplos inputs na mesma célula
                     if (this.querySelector('input')) return;
 
+                    // Obter o valor atual, priorizando data-date ou texto da célula
                     const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
                     const input = document.createElement('input');
                     input.type = 'date';
                     input.value = currentValue;
-                    
-                    // Limpar o conteúdo da célula e adicionar o input
+
+                    // Limpar a célula e adicionar o input
                     this.textContent = '';
                     this.appendChild(input);
                     input.focus();
 
                     // Salvar a data quando o input perder o foco
                     input.addEventListener('blur', function() {
-                        const newValue = this.value;
+                        const newValue = this.value; // Valor do input (YYYY-MM-DD)
                         const parentCell = this.parentElement;
                         if (parentCell) {
-                            parentCell.textContent = newValue ? toLocaleDate(newValue) : '';
-                            try {
-                                parentCell.setAttribute('data-date', newValue || '');
-                            } catch (e) {
-                                console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
+                            if (newValue) {
+                                // Converter para DD/MM/YYYY para exibição
+                                parentCell.textContent = toLocaleDate(newValue);
+                                try {
+                                    parentCell.setAttribute('data-date', newValue);
+                                    console.log(`Data salva: ${newValue} (exibida como ${toLocaleDate(newValue)})`);
+                                } catch (e) {
+                                    console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
+                                }
+                            } else {
+                                // Caso o input esteja vazio, limpar a célula
+                                parentCell.textContent = '';
+                                parentCell.setAttribute('data-date', '');
+                                console.log('Data limpa');
                             }
                         } else {
                             console.warn('Erro: parentElement não encontrado ao salvar data.');
