@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Dados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        /* Centralizar colunas da 5ª até a última (índices 5 a 17) */
+        th:nth-child(n+5), td:nth-child(n+5) {
+            text-align: center;
+        }
+        /* Estilo para células editáveis */
+        td.editable {
+            cursor: pointer;
+            position: relative;
+        }
+        td.editable:hover {
+            background-color: #e0f7fa;
+        }
+        /* Estilo para o input de data */
+        td.editable input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        @media screen and (max-width: 600px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Dados</h1>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>NOME COMPLETO</th>
+                <th>D.N</th>
+                <th>IDADE</th>
+                <th>SEXO</th>
+                <th>ACS</th>
+                <th>VISITA NEO-NATAL</th>
+                <th>1 MÊS</th>
+                <th>2 MESES</th>
+                <th>3 MESES</th>
+                <th>4 MESES</th>
+                <th>6 MESES</th>
+                <th>9 MESES</th>
+                <th>12 MESES</th>
+                <th>18 MESES</th>
+                <th>24 MESES</th>
+                <th>3 ANOS</th>
+                <th>EM DIA</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Dados serão inseridos aqui via JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        // Função para validar se o texto é uma data válida
+        function isValidDate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return false;
+            // Tenta interpretar como DD/MM/YYYY
+            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            if (regex.test(dateString)) {
+                const [day, month, year] = dateString.split('/').map(Number);
+                const date = new Date(year, month - 1, day);
+                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+            }
+            // Tenta como data genérica
+            const date = new Date(dateString);
+            return date instanceof Date && !isNaN(date);
+        }
+
+        // Função para converter data DD/MM/YYYY para formato ISO (YYYY-MM-DD)
+        function toISODate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return '';
+            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            if (regex.test(dateString)) {
+                const [day, month, year] = dateString.split('/');
+                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            return dateString; // Retorna o original se não for DD/MM/YYYY
+        }
+
+        // Função para converter data ISO para DD/MM/YYYY
+        function toLocaleDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            if (!isValidDate(date)) return '';
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Função para carregar e processar o CSV
+        async function loadCSV() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOUP-8S0wpcTU97tn_MhDerYkPNNmLITOO_3VKkmfQ9R1OvIbKulOh1GTRjGXo_IBX-keRbW-FZFaZ/pub?gid=713509742&single=true&output=csv';
+            
+            try {
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(','));
+
+                // A partir da linha 10 (índice 9) e colunas D a T (índice 3 a 19)
+                const dataRows = rows.slice(10); // Dados a partir da linha 11
+
+                const tableBody = document.getElementById('table-body');
+                if (!tableBody) {
+                    console.error('Elemento table-body não encontrado.');
+                    return;
+                }
+                tableBody.innerHTML = ''; // Limpa o corpo da tabela
+
+                dataRows.forEach((row, rowIndex) => {
+                    const rowData = row.slice(3, 20); // Colunas D a T
+                    if (rowData.length >= 17) { // Garante que a linha tem pelo menos 17 colunas
+                        const tr = document.createElement('tr');
+                        rowData.forEach((cell, index) => {
+                            const td = document.createElement('td');
+                            td.textContent = cell || ''; // Garante que a célula não seja undefined
+                            // Tornar colunas 6 a 16 (índices 5 a 15) editáveis
+                            if (index >= 5 && index <= 15) {
+                                td.classList.add('editable');
+                                // Inicializar com o valor como data, se for uma data válida
+                                if (cell && isValidDate(cell)) {
+                                    try {
+                                        td.setAttribute('data-date', toISODate(cell));
+                                    } catch (e) {
+                                        console.warn(`Erro ao definir data-date na linha ${rowIndex + 11}, coluna ${index + 4}:`, cell);
+                                    }
+                                }
+                            }
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    } else {
+                        console.warn(`Linha ${rowIndex + 11} ignorada: contém menos de 17 colunas.`);
+                    }
+                });
+
+                // Adicionar eventos de edição às células editáveis
+                addEditableEvents();
+            } catch (error) {
+                console.error('Erro ao carregar o CSV:', error);
+                const tableBody = document.getElementById('table-body');
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="17">Erro ao carregar os dados.</td></tr>';
+                }
+            }
+        }
+
+        // Função para adicionar eventos de edição
+        function addEditableEvents() {
+            const editableCells = document.querySelectorAll('td.editable');
+            editableCells.forEach(cell => {
+                cell.addEventListener('click', function() {
+                    // Evitar múltiplos inputs na mesma célula
+                    if (this.querySelector('input')) return;
+
+                    const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
+                    const input = document.createElement('input');
+                    input.type = 'date';
+                    input.value = currentValue;
+                    
+                    // Limpar o conteúdo da célula e adicionar o input
+                    this.textContent = '';
+                    this.appendChild(input);
+                    input.focus();
+
+                    // Salvar a data quando o input perder o foco
+                    input.addEventListener('blur', function() {
+                        const newValue = this.value;
+                        const parentCell = this.parentElement;
+                        if (parentCell) {
+                            parentCell.textContent = newValue ? toLocaleDate(newValue) : '';
+                            try {
+                                parentCell.setAttribute('data-date', newValue || '');
+                            } catch (e) {
+                                console.warn('Erro ao salvar data-date:', { newValue, error: e.message });
+                            }
+                        } else {
+                            console.warn('Erro: parentElement não encontrado ao salvar data.');
+                        }
+                    });
+
+                    // Salvar a data ao pressionar Enter
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Carrega o CSV quando a página for carregada
+        window.onload = loadCSV;
+    </script>
+</body>
+</html>
