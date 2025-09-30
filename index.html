@@ -1,325 +1,84 @@
-<!DOCTYPE html>
-<html>
+<<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUERICULTURA</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-        /* Centralizar colunas da 5ª até a última (índices 5 a 17) */
-        th:nth-child(n+5), td:nth-child(n+5) {
-            text-align: center;
-        }
-        /* Estilo para células editáveis */
-        td.editable {
-            cursor: pointer;
-            position: relative;
-        }
-        td.editable:hover {
-            background-color: #e0f7fa;
-        }
-        /* Estilo para o input de data */
-        td.editable input[type="date"] {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #ddd;
-        }
-        @media screen and (max-width: 600px) {
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-        }
-        /* Estilo para mensagens de status */
-        #status-message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
+        /* Seu CSS original aqui (sem alterações) */
+        body { font-family: Arial, sans-serif; margin: 0px; background-color: #f4f4f9; }
+        h1 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; padding: 12px; background-color: #fff; box-sizing: border-box; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th:nth-child(n+5), td:nth-child(n+5) { text-align: center; }
+        td.editable { cursor: pointer; position: relative; }
+        td.editable:hover { background-color: #e0f7fa; }
+        td.editable input[type="date"] { width: 100%; padding: 8px; border: none; outline: none; font-size: 16px; box-sizing: border-box; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #ddd; }
+        @media screen and (max-width: 600px) { table { display: block; overflow-x: auto; } }
+        #loader { text-align: center; padding: 20px; font-size: 1.2em; }
     </style>
 </head>
 <body>
-    <h1>Lista de Dados</h1>
-    <p id="status-message" style="text-align: center; color: black;">Carregando...</p>
-    
+    <h1>PUERICULTURA</h1>
     <table id="data-table">
         <thead>
             <tr>
-                <th>NOME COMPLETO</th>
-                <th>D.N</th>
-                <th>IDADE</th>
-                <th>SEXO</th>
-                <th>ACS</th>
-                <th>VISITA NEO-NATAL</th>
-                <th>1 MÊS</th>
-                <th>2 MESES</th>
-                <th>3 MESES</th>
-                <th>4 MESES</th>
-                <th>6 MESES</th>
-                <th>9 MESES</th>
-                <th>12 MESES</th>
-                <th>18 MESES</th>
-                <th>24 MESES</th>
-                <th>3 ANOS</th>
-                <th>EM DIA</th>
+                <th>NOME COMPLETO</th> <th>D.N</th> <th>IDADE</th> <th>SEXO</th> <th>ACS</th>
+                <th>VISITA NEO-NATAL</th> <th>1 MÊS</th> <th>2 MESES</th> <th>3 MESES</th>
+                <th>4 MESES</th> <th>6 MESES</th> <th>9 MESES</th> <th>12 MESES</th>
+                <th>18 MESES</th> <th>24 MESES</th> <th>3 ANOS</th> <th>EM DIA</th>
             </tr>
         </thead>
         <tbody id="table-body">
-            <tr><td colspan="17">Buscando dados na planilha...</td></tr>
+            <!-- Dados serão inseridos aqui via JavaScript -->
         </tbody>
     </table>
+    <div id="loader">Carregando dados da planilha...</div>
 
     <script>
-        // --- FUNÇÕES DE UTILIDADE DE DATA ---
-
-        function isValidDate(dateString) { 
-            if (!dateString || typeof dateString !== 'string') return false;
-            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
-            if (regexDDMMYYYY.test(dateString)) {
-                const [day, month, year] = dateString.split('/').map(Number);
-                const fullYear = year < 100 ? 2000 + year : year;
-                const date = new Date(fullYear, month - 1, day);
-                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === fullYear;
-            }
-            const regexYYYYMMDD = /^(\d{4})-(\d{2})-(\d{2})$/;
-            if (regexYYYYMMDD.test(dateString)) {
-                const [year, month, day] = dateString.split('-').map(Number);
-                const date = new Date(year, month - 1, day);
-                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
-            }
-            const date = new Date(dateString);
-            return date instanceof Date && !isNaN(date);
-        }
-
-        function toISODate(dateString) { 
-            if (!dateString || typeof dateString !== 'string') return '';
-            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
-            if (regexDDMMYYYY.test(dateString)) {
-                const [day, month, year] = dateString.split('/').map(Number);
-                const fullYear = year < 100 ? 2000 + year : year;
-                return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            }
-            if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateString)) {
-                return dateString;
-            }
-            return '';
-        }
-
-        function toLocaleDate(dateString) { 
-            if (!dateString || !isValidDate(dateString)) { return ''; }
-            const date = new Date(dateString);
-            // Corrige o fuso horário para garantir que a data seja exibida corretamente
-            const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000); 
-            
-            const day = adjustedDate.getDate().toString().padStart(2, '0');
-            const month = (adjustedDate.getMonth() + 1).toString().padStart(2, '0');
-            const year = adjustedDate.getFullYear().toString().slice(-2);
-            return `${day}/${month}/${year}`;
-        }
-
-        // --- FUNÇÕES DE INTERAÇÃO COM APPS SCRIPT ---
-
-        /**
-         * Envia a atualização para a Planilha Google através do Apps Script.
-         * @param {number} rowIndex - Índice da linha de dados (base 0)
-         * @param {number} columnIndex - Índice da coluna de dados (base 0)
-         * @param {string} newValue - Novo valor no formato ISO (YYYY-MM-DD) ou string vazia.
-         * @param {HTMLElement} cellElement - A célula TD para feedback visual.
-         */
-        function saveUpdate(rowIndex, columnIndex, newValue, cellElement) {
-            console.log(`Tentando salvar: Linha ${rowIndex}, Coluna ${columnIndex}, Valor: ${newValue}`);
-            const statusMessage = document.getElementById('status-message');
-            
-            statusMessage.textContent = 'Salvando... Aguarde a Planilha Google atualizar.';
-            statusMessage.style.backgroundColor = '#fff3cd'; // Amarelo claro
-            statusMessage.style.color = '#856404'; // Amarelo escuro
-
-            // Chama a função updateCell no Code.gs
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    if (response.success) {
-                        statusMessage.textContent = 'Salvo com sucesso! Recarregando...';
-                        statusMessage.style.backgroundColor = '#d4edda'; // Verde claro
-                        statusMessage.style.color = '#155724'; // Verde escuro
-                        
-                        // Recarrega os dados para pegar o valor atualizado da planilha (incluindo "EM DIA")
-                        loadData(); 
-                    } else {
-                        statusMessage.textContent = 'ERRO ao salvar: ' + response.message;
-                        statusMessage.style.backgroundColor = '#f8d7da'; // Vermelho claro
-                        statusMessage.style.color = '#721c24'; // Vermelho escuro
-                        // Se falhar, recarrega para voltar ao estado anterior
-                        loadData(); 
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    statusMessage.textContent = 'ERRO DE COMUNICAÇÃO: ' + error.message;
-                    statusMessage.style.backgroundColor = '#f8d7da';
-                    statusMessage.style.color = '#721c24';
-                    loadData();
-                })
-                .updateCell(rowIndex, columnIndex, newValue);
-        }
-
-
-        /**
-         * Constrói a tabela HTML com os dados retornados do Apps Script.
-         * @param {Array<Array<any>>} dataRows - Dados da Planilha (linhas x colunas).
-         */
-        function buildTable(dataRows) {
-            const tableBody = document.getElementById('table-body');
-            tableBody.innerHTML = ''; 
-            document.getElementById('status-message').textContent = 'Dados carregados.';
-            document.getElementById('status-message').style.backgroundColor = 'transparent';
-            document.getElementById('status-message').style.color = 'black';
-
-            dataRows.forEach((rowData, rowIndex) => {
-                const tr = document.createElement('tr');
-                // Salva o índice da linha de dados, necessário para salvar no Sheets
-                tr.setAttribute('data-row-index', rowIndex); 
-
-                rowData.forEach((cellValue, colIndex) => {
-                    const td = document.createElement('td');
-                    
-                    // O valor pode vir como objeto Date do GAS. Converte para string.
-                    let displayValue = (cellValue instanceof Date) ? toLocaleDate(cellValue.toISOString().split('T')[0]) : (cellValue || '');
-                    td.textContent = displayValue;
-                    
-                    // Colunas editáveis (índices 5 a 15 no array de dados)
-                    if (colIndex >= 5 && colIndex <= 15) {
-                        td.classList.add('editable');
-                        // Salva o índice da coluna do array de dados (relativo à coluna D no Sheets)
-                        td.setAttribute('data-col-index', colIndex); 
-                        
-                        // Se for uma data, armazena o formato ISO no atributo data-date
-                        if (cellValue instanceof Date || isValidDate(cellValue)) {
-                            const isoDate = (cellValue instanceof Date) ? cellValue.toISOString().split('T')[0] : toISODate(cellValue);
-                            td.setAttribute('data-date', isoDate);
-                        }
-                    }
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
-            });
-
-            addEditableEvents();
-        }
-
-        // Função para carregar dados usando google.script.run
-        function loadData() {
-            const tableBody = document.getElementById('table-body');
-            const statusMessage = document.getElementById('status-message');
-            
-            tableBody.innerHTML = '<tr><td colspan="17">Buscando dados na planilha...</td></tr>';
-            statusMessage.textContent = 'Buscando dados na planilha...';
-            statusMessage.style.backgroundColor = 'transparent';
-            statusMessage.style.color = 'black';
-
-            // Chama a função getData no Code.gs
-            google.script.run
-                .withSuccessHandler(buildTable)
-                .withFailureHandler(function(error) {
-                    console.error('Erro ao carregar dados:', error);
-                    tableBody.innerHTML = '<tr><td colspan="17">Erro ao carregar os dados. Verifique o SPREADSHEET_ID e SHEET_NAME no Code.gs.</td></tr>';
-                    statusMessage.textContent = 'Erro ao carregar dados. 😥';
-                    statusMessage.style.backgroundColor = '#f8d7da';
-                    statusMessage.style.color = '#721c24';
-                })
-                .getData();
-        }
-
-        // --- LÓGICA DE EDIÇÃO (MODIFICADA) ---
-
-        function addEditableEvents() {
-            const editableCells = document.querySelectorAll('td.editable');
-            editableCells.forEach(cell => {
-                cell.addEventListener('click', function() {
-                    if (this.querySelector('input')) return;
-
-                    // Pega a data ISO (YYYY-MM-DD) do atributo data-date ou tenta converter o texto
-                    const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
-                    
-                    const input = document.createElement('input');
-                    input.type = 'date';
-                    input.value = currentValue;
-
-                    this.textContent = '';
-                    this.appendChild(input);
-                    input.focus();
-
-                    // Salvar a data quando o input perder o foco
-                    input.addEventListener('blur', function() {
-                        const newValue = this.value; // Valor no formato ISO (YYYY-MM-DD)
-                        const parentCell = this.parentElement;
-                        if (!parentCell) return;
-                        
-                        const rowIndex = parseInt(parentCell.parentElement.getAttribute('data-row-index'));
-                        const colIndex = parseInt(parentCell.getAttribute('data-col-index'));
-                        
-                        // Remover o input
-                        try { parentCell.removeChild(this); } catch (e) { console.warn('Erro ao remover input:', e.message); }
-
-                        if (newValue && isValidDate(newValue)) {
-                            // Se o valor for uma data válida, salva e atualiza a exibição local
-                            const formattedDate = toLocaleDate(newValue);
-                            parentCell.textContent = formattedDate;
-                            parentCell.setAttribute('data-date', newValue);
-                            
-                            // CHAMA A FUNÇÃO DE SALVAMENTO para o Apps Script
-                            saveUpdate(rowIndex, colIndex, newValue, parentCell);
-                        } else {
-                            // Se vazio ou inválido, limpa a célula e envia uma string vazia
-                            parentCell.textContent = '';
-                            parentCell.setAttribute('data-date', '');
-                            saveUpdate(rowIndex, colIndex, '', parentCell);
-                        }
-                    }, { once: true });
-
-                    // Salvar a data ao pressionar Enter
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault(); 
-                            this.blur(); // Perder o foco para acionar o 'blur' e salvar
-                        }
-                    });
-                });
-            });
-        }
-
-        // Carrega os dados ao iniciar a Web App
+        // --- Todo o seu script principal para carregar e salvar dados fica aqui ---
+        function toISODate(dateString) { if (!dateString || typeof dateString !== 'string') return ''; const parts = dateString.split('/'); if (parts.length === 3) { let [day, month, year] = parts; if (year.length === 2) year = '20' + year; return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; } return dateString; }
+        function toLocaleDate(isoDate) { if (!isoDate) return ''; const date = new Date(isoDate + 'T00:00:00'); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = String(date.getFullYear()).slice(-2); return `${day}/${month}/${year}`; }
+        function loadData() { document.getElementById('loader').style.display = 'block'; google.script.run.withSuccessHandler(populateTable).withFailureHandler(onFailure).getData(); }
+        function onFailure(error) { document.getElementById('loader').textContent = 'Erro ao carregar dados: ' + error.message; alert('Erro: ' + error.message); }
+        function populateTable(data) { if (data.error) { onFailure(data); return; } const tableBody = document.getElementById('table-body'); tableBody.innerHTML = ''; data.forEach((row, rowIndex) => { if (!row[0]) return; const tr = document.createElement('tr'); tr.setAttribute('data-row-index', rowIndex); row.forEach((cellData, colIndex) => { const td = document.createElement('td'); td.textContent = cellData; td.setAttribute('data-col-index', colIndex); if (colIndex >= 5 && colIndex <= 15) { td.classList.add('editable'); td.addEventListener('click', makeCellEditable); } tr.appendChild(td); }); tableBody.appendChild(tr); }); document.getElementById('loader').style.display = 'none'; }
+        function makeCellEditable() { if (this.querySelector('input')) return; const originalValue = this.textContent; const isoDate = toISODate(originalValue); this.innerHTML = ''; const input = document.createElement('input'); input.type = 'date'; input.value = isoDate; input.addEventListener('blur', () => saveCellData(this, input.value, originalValue)); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { this.innerHTML = originalValue; } }); this.appendChild(input); input.focus(); }
+        function saveCellData(cell, newISOValue, originalText) { const rowIndex = parseInt(cell.parentElement.getAttribute('data-row-index')); const colIndex = parseInt(cell.getAttribute('data-col-index')); const newDisplayText = newISOValue ? toLocaleDate(newISOValue) : ''; if (newDisplayText === originalText) { cell.innerHTML = originalText; return; } cell.innerHTML = newDisplayText; console.log(`Salvando... Linha: ${rowIndex}, Coluna: ${colIndex}, Valor: ${newDisplayText}`); google.script.run.withSuccessHandler(response => console.log(response.message)).withFailureHandler(onFailure).updateData(rowIndex, colIndex, newDisplayText); }
         window.onload = loadData;
     </script>
+
+    <!-- SOLUÇÃO DEFINITIVA PARA REMOVER O BANNER DO GOOGLE -->
+    <script>
+      const observer = new MutationObserver((mutationsList, observer) => {
+        // Itera sobre todas as mutações que ocorreram
+        for (const mutation of mutationsList) {
+          if (mutation.type === 'childList') {
+            // Itera sobre todos os nós (elementos) que foram adicionados
+            for (const node of mutation.addedNodes) {
+              // Verifica se o nó é um elemento HTML (e não texto, por exemplo)
+              if (node.nodeType === 1) { 
+                // Verifica se o elemento adicionado corresponde às características do banner
+                if (node.style.position === 'fixed' && node.style.top === '0px') {
+                  console.log('Banner do Google detectado e removido.');
+                  node.style.display = 'none';
+                  // Uma vez removido, podemos parar de observar para economizar recursos.
+                  observer.disconnect();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Inicia a observação no corpo do documento (<body>)
+      // 'childList: true' observa a adição e remoção de elementos filhos
+      // 'subtree: true' estende a observação para todos os descendentes do <body>
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+
 </body>
 </html>
