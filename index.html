@@ -1,24 +1,23 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUERICULTURA</title>
     <style>
-        /* Seu CSS original aqui (sem alterações) */
-        body { font-family: Arial, sans-serif; margin: 0px; background-color: #f4f4f9; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 12px; background-color: #f4f4f9; box-sizing: border-box; }
         h1 { text-align: center; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; padding: 12px; background-color: #fff; box-sizing: border-box; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
         th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; position: sticky; top: 0; z-index: 10; }
         th:nth-child(n+5), td:nth-child(n+5) { text-align: center; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #e0e0e0; }
         td.editable { cursor: pointer; position: relative; }
         td.editable:hover { background-color: #e0f7fa; }
-        td.editable input[type="date"] { width: 100%; padding: 8px; border: none; outline: none; font-size: 16px; box-sizing: border-box; }
-        th { background-color: #4CAF50; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        tr:hover { background-color: #ddd; }
-        @media screen and (max-width: 600px) { table { display: block; overflow-x: auto; } }
+        td.editable input[type="date"] { width: 100%; padding: 8px; border: none; outline: none; font-size: 16px; box-sizing: border-box; background-color: transparent; }
         #loader { text-align: center; padding: 20px; font-size: 1.2em; }
+        @media screen and (max-width: 600px) { table { display: block; overflow-x: auto; } }
     </style>
 </head>
 <body>
@@ -32,53 +31,106 @@
                 <th>18 MESES</th> <th>24 MESES</th> <th>3 ANOS</th> <th>EM DIA</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-            <!-- Dados serão inseridos aqui via JavaScript -->
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
     <div id="loader">Carregando dados da planilha...</div>
 
     <script>
-        // --- Todo o seu script principal para carregar e salvar dados fica aqui ---
+        // !!! IMPORTANTE: Cole aqui a URL do seu App da Web do Google Apps Script !!!
+        const API_URL = "https://script.google.com/macros/s/AKfycbwBuLgVSME5GdndUegAnBhhSCRZXxway0vzGnMEl0Tu4dcq_a1wDzukbA7KAFzyMRXn/exec";
+
+        // --- FUNÇÕES DE MANIPULAÇÃO DE DATA ---
         function toISODate(dateString) { if (!dateString || typeof dateString !== 'string') return ''; const parts = dateString.split('/'); if (parts.length === 3) { let [day, month, year] = parts; if (year.length === 2) year = '20' + year; return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; } return dateString; }
         function toLocaleDate(isoDate) { if (!isoDate) return ''; const date = new Date(isoDate + 'T00:00:00'); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = String(date.getFullYear()).slice(-2); return `${day}/${month}/${year}`; }
-        function loadData() { document.getElementById('loader').style.display = 'block'; google.script.run.withSuccessHandler(populateTable).withFailureHandler(onFailure).getData(); }
-        function onFailure(error) { document.getElementById('loader').textContent = 'Erro ao carregar dados: ' + error.message; alert('Erro: ' + error.message); }
-        function populateTable(data) { if (data.error) { onFailure(data); return; } const tableBody = document.getElementById('table-body'); tableBody.innerHTML = ''; data.forEach((row, rowIndex) => { if (!row[0]) return; const tr = document.createElement('tr'); tr.setAttribute('data-row-index', rowIndex); row.forEach((cellData, colIndex) => { const td = document.createElement('td'); td.textContent = cellData; td.setAttribute('data-col-index', colIndex); if (colIndex >= 5 && colIndex <= 15) { td.classList.add('editable'); td.addEventListener('click', makeCellEditable); } tr.appendChild(td); }); tableBody.appendChild(tr); }); document.getElementById('loader').style.display = 'none'; }
-        function makeCellEditable() { if (this.querySelector('input')) return; const originalValue = this.textContent; const isoDate = toISODate(originalValue); this.innerHTML = ''; const input = document.createElement('input'); input.type = 'date'; input.value = isoDate; input.addEventListener('blur', () => saveCellData(this, input.value, originalValue)); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { this.innerHTML = originalValue; } }); this.appendChild(input); input.focus(); }
-        function saveCellData(cell, newISOValue, originalText) { const rowIndex = parseInt(cell.parentElement.getAttribute('data-row-index')); const colIndex = parseInt(cell.getAttribute('data-col-index')); const newDisplayText = newISOValue ? toLocaleDate(newISOValue) : ''; if (newDisplayText === originalText) { cell.innerHTML = originalText; return; } cell.innerHTML = newDisplayText; console.log(`Salvando... Linha: ${rowIndex}, Coluna: ${colIndex}, Valor: ${newDisplayText}`); google.script.run.withSuccessHandler(response => console.log(response.message)).withFailureHandler(onFailure).updateData(rowIndex, colIndex, newDisplayText); }
+
+        // --- FUNÇÕES DE COMUNICAÇÃO COM A API ---
+        async function loadData() {
+            document.getElementById('loader').style.display = 'block';
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error(`Erro na rede: ${response.statusText}`);
+                const json = await response.json();
+                if (json.error) throw new Error(`Erro na API: ${json.error}`);
+                populateTable(json.data);
+            } catch (error) {
+                onFailure(error);
+            }
+        }
+
+        async function updateDataAPI(rowIndex, colIndex, newValue) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'cors', // Essencial para requisições entre domínios diferentes
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ row: rowIndex, col: colIndex, value: newValue })
+                });
+                const result = await response.json();
+                if (result.status !== 'success') throw new Error(result.message);
+                console.log('API Response:', result.message);
+            } catch (error) {
+                alert(`Falha ao salvar: ${error.message}`);
+                // Opcional: reverter a alteração na tela se a API falhar
+                loadData(); 
+            }
+        }
+
+        function onFailure(error) {
+            document.getElementById('loader').textContent = 'Erro ao carregar dados: ' + error.message;
+            console.error(error);
+        }
+
+        // --- FUNÇÕES DE MANIPULAÇÃO DA TABELA (DOM) ---
+        function populateTable(data) {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            data.forEach((row, rowIndex) => {
+                if (!row[0]) return;
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-row-index', rowIndex);
+                row.forEach((cellData, colIndex) => {
+                    const td = document.createElement('td');
+                    td.textContent = cellData;
+                    td.setAttribute('data-col-index', colIndex);
+                    if (colIndex >= 5 && colIndex <= 15) {
+                        td.classList.add('editable');
+                        td.addEventListener('click', makeCellEditable);
+                    }
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function makeCellEditable() {
+            if (this.querySelector('input')) return;
+            const originalValue = this.textContent;
+            const isoDate = toISODate(originalValue);
+            this.innerHTML = '';
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.value = isoDate;
+            input.addEventListener('blur', () => saveCellData(this, input.value, originalValue));
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') this.innerHTML = originalValue; });
+            this.appendChild(input);
+            input.focus();
+        }
+
+        function saveCellData(cell, newISOValue, originalText) {
+            const newDisplayText = newISOValue ? toLocaleDate(newISOValue) : '';
+            if (newDisplayText === originalText) {
+                cell.innerHTML = originalText;
+                return;
+            }
+            cell.innerHTML = newDisplayText;
+            const rowIndex = parseInt(cell.parentElement.getAttribute('data-row-index'));
+            const colIndex = parseInt(cell.getAttribute('data-col-index'));
+            updateDataAPI(rowIndex, colIndex, newDisplayText);
+        }
+
+        // --- INICIALIZAÇÃO ---
         window.onload = loadData;
     </script>
-
-    <!-- SOLUÇÃO DEFINITIVA PARA REMOVER O BANNER DO GOOGLE -->
-    <script>
-      const observer = new MutationObserver((mutationsList, observer) => {
-        // Itera sobre todas as mutações que ocorreram
-        for (const mutation of mutationsList) {
-          if (mutation.type === 'childList') {
-            // Itera sobre todos os nós (elementos) que foram adicionados
-            for (const node of mutation.addedNodes) {
-              // Verifica se o nó é um elemento HTML (e não texto, por exemplo)
-              if (node.nodeType === 1) { 
-                // Verifica se o elemento adicionado corresponde às características do banner
-                if (node.style.position === 'fixed' && node.style.top === '0px') {
-                  console.log('Banner do Google detectado e removido.');
-                  node.style.display = 'none';
-                  // Uma vez removido, podemos parar de observar para economizar recursos.
-                  observer.disconnect();
-                  return;
-                }
-              }
-            }
-          }
-        }
-      });
-
-      // Inicia a observação no corpo do documento (<body>)
-      // 'childList: true' observa a adição e remoção de elementos filhos
-      // 'subtree: true' estende a observação para todos os descendentes do <body>
-      observer.observe(document.body, { childList: true, subtree: true });
-    </script>
-
 </body>
 </html>
