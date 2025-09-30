@@ -1,3 +1,17 @@
+Com certeza! É uma ótima ideia ter o código HTML final à mão para garantir que tudo esteja perfeitamente alinhado com o `Code.gs` que acabamos de corrigir.
+
+Este código `index.html` está pronto para ser usado no seu GitHub Pages. Ele já contém todas as melhorias e correções que discutimos.
+
+**Sua única tarefa:**
+1.  Copie **todo** o código abaixo.
+2.  Cole no seu arquivo `index.html` no GitHub, substituindo tudo.
+3.  **Lembre-se de colocar a URL do seu App da Web** na linha 110, onde está indicado.
+
+---
+
+### Código HTML Completo e Final (para o GitHub)
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,10 +33,10 @@
             margin-top: 0;
         }
 
-        /* Estilos da Tabela */
+        /* Container da Tabela para Rolagem Horizontal */
         .table-container {
             width: 100%;
-            overflow-x: auto; /* Garante a rolagem horizontal em telas pequenas */
+            overflow-x: auto; 
         }
         table { 
             width: 100%; 
@@ -35,12 +49,12 @@
             padding: 12px 15px; 
             text-align: left; 
             border: 1px solid #ddd; 
-            white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+            white-space: nowrap; /* Impede que o texto das células quebre em várias linhas */
         }
         th { 
             background-color: #4CAF50; 
             color: white; 
-            position: sticky; /* Faz o cabeçalho grudar no topo */
+            position: sticky; /* Faz o cabeçalho grudar no topo ao rolar */
             top: 0;           
             z-index: 10;      
         }
@@ -94,7 +108,17 @@
                     <th>NOME COMPLETO</th> <th>D.N</th> <th>IDADE</th> <th>SEXO</th> <th>ACS</th>
                     <th>VISITA NEO-NATAL</th> <th>1 MÊS</th> <th>2 MESES</th> <th>3 MESES</th>
                     <th>4 MESES</th> <th>6 MESES</th> <th>9 MESES</th> <th>12 MESES</th>
-                    <th>18 MESES</th> <th>24 MESES</th> <th>3 ANOS
+                    <th>18 MESES</th> <th>24 MESES</th> <th>3 ANOS</th> <th>EM DIA</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+    <div id="loader">Carregando dados da planilha...</div>
+
+    <script>
+        // =================================================================================
+        // !!! IMPORTANTE: Cole aqui a URL do seu App da Web do Google Apps Script !!!
         // =================================================================================
         const API_URL = "https://script.google.com/macros/s/AKfycbwBuLgVSME5GdndUegAnBhhSCRZXxway0vzGnMEl0Tu4dcq_a1wDzukbA7KAFzyMRXn/exec";
 
@@ -106,7 +130,7 @@
         async function loadData() {
             document.getElementById('loader').style.display = 'block';
             try {
-                const response = await fetch(API_URL, { redirect: 'follow' }); // Adicionado 'redirect'
+                const response = await fetch(API_URL, { redirect: 'follow' });
                 if (!response.ok) throw new Error(`Erro na rede: ${response.statusText}`);
                 const json = await response.json();
                 if (json.error) throw new Error(`Erro na API: ${json.error}`);
@@ -121,7 +145,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     mode: 'cors',
-                    redirect: 'follow', // Adicionado 'redirect'
+                    redirect: 'follow',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ row: rowIndex, col: colIndex, value: newValue })
                 });
@@ -193,3 +217,4 @@
     </script>
 </body>
 </html>
+```
