@@ -106,7 +106,7 @@
         // =================================================================================
         // !!! IMPORTANTE: Cole aqui a URL do seu App da Web do Google Apps Script !!!
         // =================================================================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbwBuLgVSME5GdndUegAnBhhSCRZXxway0vzGnMEl0Tu4dcq_a1wDzukbA7KAFzyMRXn/exec";
+        const API_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjWQ2FMQlAK0zQq6y11Kc6Vc7AZMnLczeeVGDM2woZNSXJrEDs8QkUNqscRfxRWTqLU5YJRlek7O5Oi60cuh34IyfV9d9nmbI336HQbO9nLNj4DHhCKgh7tmKAITuH91omJtyOfHs7c1qXV4ubminbYKejn9THmm-k4AV2NVpyDm0a-peBm2Pq_IcAB2xJqrldnaQ2o8ZAvkNA2O8SlJ3-g7ruZiIs9R5a_pmk43ovDdqsMRD33R0buaNx4pqmmvYk1wAiDCCUb6S3ee1cRci_SI3LzCw&lib=MYX-rnShP1A4NAW6-a8EuKz0KlVsBVvwT";
 
         // --- FUNÇÕES DE MANIPULAÇÃO DE DATA ---
         function toISODate(dateString) { if (!dateString || typeof dateString !== 'string') return ''; const parts = dateString.split('/'); if (parts.length === 3) { let [day, month, year] = parts; if (year.length === 2) year = '20' + year; return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; } return dateString; }
