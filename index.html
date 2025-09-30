@@ -117,6 +117,8 @@
             document.getElementById('loader').style.display = 'block';
             try {
                 const response = await fetch(API_URL, { redirect: 'follow' });
+                console.log('Response Status:', response.status); // Depuração
+                console.log('Response Text:', await response.text()); // Depuração
                 if (!response.ok) throw new Error(`Erro na rede: ${response.statusText}`);
                 const json = await response.json();
                 if (json.error) throw new Error(`Erro na API: ${json.error}`);
@@ -203,4 +205,3 @@
     </script>
 </body>
 </html>
-```
