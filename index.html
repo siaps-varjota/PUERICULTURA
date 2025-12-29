@@ -3,205 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUERICULTURA</title>
+    <title>Lista de Dados</title>
     <style>
-        /* Estilos Globais e Layout */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; 
-            padding: 16px; 
-            background-color: #f4f4f9; 
-            box-sizing: border-box; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
         }
-        h1 { 
-            text-align: center; 
-            color: #333; 
-            margin-top: 0;
+        h1 {
+            text-align: center;
+            color: #333;
         }
-
-        /* Container da Tabela para Rolagem Horizontal */
-        .table-container {
+        table {
             width: 100%;
-            overflow-x: auto; 
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 20px 0; 
-            background-color: #fff; 
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
         }
-        th, td { 
-            padding: 12px 15px; 
-            text-align: left; 
-            border: 1px solid #ddd; 
-            white-space: nowrap; /* Impede que o texto das células quebre em várias linhas */
+        th:nth-child(n+5), td:nth-child(n+5) {
+            text-align: center;
         }
-        th { 
-            background-color: #4CAF50; 
-            color: white; 
-            position: sticky; /* Faz o cabeçalho grudar no topo ao rolar */
-            top: 0;           
-            z-index: 10;      
+        td.editable {
+            cursor: pointer;
+            position: relative;
         }
-        
-        /* Alinhamento e Estilos de Células */
-        th:nth-child(n+5), td:nth-child(n+5) { 
-            text-align: center; 
+        td.editable:hover {
+            background-color: #e0f7fa;
         }
-        tr:nth-child(even) { 
-            background-color: #f9f9f9; 
+        td.editable input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        tr:hover { 
-            background-color: #f1f1f1; 
+        th {
+            background-color: #4CAF50;
+            color: white;
         }
-
-        /* Células Editáveis */
-        td.editable { 
-            cursor: pointer; 
-            position: relative; 
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
-        td.editable:hover { 
-            background-color: #e0f7fa; 
+        tr:hover {
+            background-color: #ddd;
         }
-        td.editable input[type="date"] { 
-            width: 100%; 
-            padding: 8px; 
-            border: none; 
-            outline: none; 
-            font-size: 1em; 
-            box-sizing: border-box; 
-            background-color: transparent;
-            font-family: inherit;
-        }
-
-        /* Loader de Carregamento */
-        #loader { 
-            text-align: center; 
-            padding: 40px 20px; 
-            font-size: 1.2em; 
-            color: #555;
+        @media screen and (max-width: 600px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>PUERICULTURA</h1>
-
-    <div class="table-container">
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>NOME COMPLETO</th> <th>D.N</th> <th>IDADE</th> <th>SEXO</th> <th>ACS</th>
-                    <th>VISITA NEO-NATAL</th> <th>1 MÊS</th> <th>2 MESES</th> <th>3 MESES</th>
-                    <th>4 MESES</th> <th>6 MESES</th> <th>9 MESES</th> <th>12 MESES</th>
-                    <th>18 MESES</th> <th>24 MESES</th> <th>3 ANOS</th> <th>EM DIA</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
-    </div>
-    <div id="loader">Carregando dados da planilha...</div>
+    <h1>Lista de Dados</h1>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>NOME COMPLETO</th>
+                <th>D.N</th>
+                <th>IDADE</th>
+                <th>SEXO</th>
+                <th>ACS</th>
+                <th>VISITA NEO-NATAL</th>
+                <th>1 MÊS</th>
+                <th>2 MESES</th>
+                <th>3 MESES</th>
+                <th>4 MESES</th>
+                <th>5 MESES</th>
+                <th>6 MESES</th>
+                <th>9 MESES</th>
+                <th>12 MESES</th>
+                <th>18 MESES</th>
+                <th>24 MESES</th>             
+                <th>EM DIA</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Dados serão inseridos aqui via JavaScript -->
+        </tbody>
+    </table>
 
     <script>
-        // =================================================================================
-        // !!! IMPORTANTE: Cole aqui a URL do seu App da Web do Google Apps Script !!!
-        // =================================================================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbwBuLgVSME5GdndUegAnBhhSCRZXxway0vzGnMEl0Tu4dcq_a1wDzukbA7KAFzyMRXn/exec";
+        // URL do web app do Apps Script (substitua pela URL real após implantação)
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwHoiZl4D-Fxo8CYAGAaVF9fu09mUVa6PGqI44xMrFYsZjEcc3Thq6wRTllIIW26Cz_/exec'; // Exemplo: https://script.google.com/macros/s/ABC123/exec
 
-        // --- FUNÇÕES DE MANIPULAÇÃO DE DATA ---
-        function toISODate(dateString) { if (!dateString || typeof dateString !== 'string') return ''; const parts = dateString.split('/'); if (parts.length === 3) { let [day, month, year] = parts; if (year.length === 2) year = '20' + year; return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; } return dateString; }
-        function toLocaleDate(isoDate) { if (!isoDate) return ''; const date = new Date(isoDate + 'T00:00:00'); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = String(date.getFullYear()).slice(-2); return `${day}/${month}/${year}`; }
+        // Função para validar se o texto é uma data válida
+        function isValidDate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return false;
+            
+            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+            if (regexDDMMYYYY.test(dateString)) {
+                const [day, month, year] = dateString.split('/').map(Number);
+                const fullYear = year < 100 ? 2000 + year : year;
+                const date = new Date(fullYear, month - 1, day);
+                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === fullYear;
+            }
+            
+            const regexYYYYMMDD = /^(\d{4})-(\d{2})-(\d{2})$/;
+            if (regexYYYYMMDD.test(dateString)) {
+                const [year, month, day] = dateString.split('-').map(Number);
+                const date = new Date(year, month - 1, day);
+                return date.getDate() === day && date.getMonth() === month - 1 && date.getFullYear() === year;
+            }
+            
+            const date = new Date(dateString);
+            return date instanceof Date && !isNaN(date);
+        }
 
-        // --- FUNÇÕES DE COMUNICAÇÃO COM A API ---
-        async function loadData() {
-            document.getElementById('loader').style.display = 'block';
+        // Função para converter data DD/MM/YYYY, DD/MM/YY ou YYYY-MM-DD para formato ISO
+        function toISODate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return '';
+            
+            const regexDDMMYYYY = /^(\d{2})\/(\d{2})\/(\d{2,4})$/;
+            if (regexDDMMYYYY.test(dateString)) {
+                const [day, month, year] = dateString.split('/').map(Number);
+                const fullYear = year < 100 ? 2000 + year : year;
+                return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            }
+            
+            if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateString)) {
+                return dateString;
+            }
+            
+            return '';
+        }
+
+        // Função para converter data ISO (YYYY-MM-DD) para DD/MM/YY
+        function toLocaleDate(dateString) {
+            if (!dateString || !isValidDate(dateString)) {
+                console.warn('toLocaleDate: Data inválida ou vazia:', dateString);
+                return '';
+            }
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+
+        // Função para carregar e processar o CSV
+        async function loadCSV() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOUP-8S0wpcTU97tn_MhDerYkPNNmLITOO_3VKkmfQ9R1OvIbKulOh1GTRjGXo_IBX-keRbW-FZFaZ/pub?gid=713509742&single=true&output=csv';
+            
             try {
-                const response = await fetch(API_URL, { redirect: 'follow' });
-                console.log('Response Status:', response.status); // Depuração
-                console.log('Response Text:', await response.text()); // Depuração
-                if (!response.ok) throw new Error(`Erro na rede: ${response.statusText}`);
-                const json = await response.json();
-                if (json.error) throw new Error(`Erro na API: ${json.error}`);
-                populateTable(json.data);
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(','));
+
+                const dataRows = rows.slice(10); // Dados a partir da linha 11
+                const tableBody = document.getElementById('table-body');
+                if (!tableBody) {
+                    console.error('Elemento table-body não encontrado.');
+                    return;
+                }
+                tableBody.innerHTML = '';
+
+                dataRows.forEach((row, rowIndex) => {
+                    const rowData = row.slice(3, 21); // Colunas D a T
+                    if (rowData.length >= 17) {
+                        const tr = document.createElement('tr');
+                        rowData.forEach((cell, index) => {
+                            const td = document.createElement('td');
+                            td.textContent = cell || '';
+                            if (index >= 5 && index <= 16) {
+                                td.classList.add('editable');
+                                td.setAttribute('data-row', rowIndex + 11); // Linha na planilha (11 + rowIndex)
+                                td.setAttribute('data-col', index + 4); // Coluna na planilha (D=4, E=5, ..., U=20)
+                                if (cell && isValidDate(cell)) {
+                                    try {
+                                        td.setAttribute('data-date', toISODate(cell));
+                                    } catch (e) {
+                                        console.warn(`Erro ao definir data-date na linha ${rowIndex + 11}, coluna ${index + 4}:`, cell);
+                                    }
+                                }
+                            }
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    } else {
+                        console.warn(`Linha ${rowIndex + 11} ignorada: contém menos de 17 colunas.`);
+                    }
+                });
+
+                addEditableEvents();
             } catch (error) {
-                onFailure(error);
+                console.error('Erro ao carregar o CSV:', error);
+                const tableBody = document.getElementById('table-body');
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="17">Erro ao carregar os dados.</td></tr>';
+                }
             }
         }
 
-        async function updateDataAPI(rowIndex, colIndex, newValue) {
+        // Função para atualizar a planilha via Apps Script
+        async function updateSpreadsheet(row, col, value) {
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ row: rowIndex, col: colIndex, value: newValue })
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ row, col, value }),
                 });
                 const result = await response.json();
-                if (result.status !== 'success') throw new Error(result.message);
-                console.log('API Response:', result.message);
+                if (result.status === 'success') {
+                    console.log(`Planilha atualizada: linha ${row}, coluna ${col}, valor ${value}`);
+                } else {
+                    console.error('Erro ao atualizar a planilha:', result.message);
+                }
             } catch (error) {
-                alert(`Falha ao salvar: ${error.message}`);
-                loadData(); 
+                console.error('Erro ao enviar atualização para o Apps Script:', error);
             }
         }
 
-        function onFailure(error) {
-            document.getElementById('loader').textContent = 'Erro ao carregar dados: ' + error.message;
-            console.error(error);
-        }
+        // Função para adicionar eventos de edição
+        function addEditableEvents() {
+            const editableCells = document.querySelectorAll('td.editable');
+            editableCells.forEach(cell => {
+                cell.addEventListener('click', function() {
+                    if (this.querySelector('input')) return;
 
-        // --- FUNÇÕES DE MANIPULAÇÃO DA TABELA (DOM) ---
-        function populateTable(data) {
-            const tableBody = document.getElementById('table-body');
-            tableBody.innerHTML = '';
-            data.forEach((row, rowIndex) => {
-                if (!row[0]) return;
-                const tr = document.createElement('tr');
-                tr.setAttribute('data-row-index', rowIndex);
-                row.forEach((cellData, colIndex) => {
-                    const td = document.createElement('td');
-                    td.textContent = cellData;
-                    td.setAttribute('data-col-index', colIndex);
-                    if (colIndex >= 5 && colIndex <= 15) {
-                        td.classList.add('editable');
-                        td.addEventListener('click', makeCellEditable);
-                    }
-                    tr.appendChild(td);
+                    const currentValue = this.getAttribute('data-date') || toISODate(this.textContent) || '';
+                    const input = document.createElement('input');
+                    input.type = 'date';
+                    input.value = currentValue;
+                    this.textContent = '';
+                    this.appendChild(input);
+                    input.focus();
+
+                    input.addEventListener('blur', async function() {
+                        const newValue = this.value;
+                        const parentCell = this.parentElement;
+                        if (!parentCell) {
+                            console.warn('Erro: parentElement não encontrado ao salvar data.');
+                            return;
+                        }
+
+                        try {
+                            parentCell.removeChild(this);
+                        } catch (e) {
+                            console.warn('Erro ao remover input:', e.message);
+                        }
+
+                        if (newValue && isValidDate(newValue)) {
+                            const formattedDate = toLocaleDate(newValue);
+                            if (formattedDate) {
+                                parentCell.textContent = formattedDate;
+                                parentCell.setAttribute('data-date', newValue);
+                                console.log(`Data salva: ${newValue} (exibida como ${formattedDate})`);
+
+                                // Enviar atualização para a planilha
+                                const row = parseInt(parentCell.getAttribute('data-row'));
+                                const col = parseInt(parentCell.getAttribute('data-col'));
+                                await updateSpreadsheet(row, col, newValue);
+                            } else {
+                                console.warn('Erro: Falha ao formatar data:', newValue);
+                                parentCell.textContent = '';
+                                parentCell.setAttribute('data-date', '');
+                            }
+                        } else {
+                            parentCell.textContent = '';
+                            parentCell.setAttribute('data-date', '');
+                            console.log('Data limpa ou inválida:', newValue);
+
+                            // Enviar atualização para limpar a célula na planilha
+                            const row = parseInt(parentCell.getAttribute('data-row'));
+                            const col = parseInt(parentCell.getAttribute('data-col'));
+                            await updateSpreadsheet(row, col, '');
+                        }
+                    }, { once: true });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();
+                        }
+                    }, { once: true });
                 });
-                tableBody.appendChild(tr);
             });
-            document.getElementById('loader').style.display = 'none';
         }
 
-        function makeCellEditable() {
-            if (this.querySelector('input')) return;
-            const originalValue = this.textContent;
-            const isoDate = toISODate(originalValue);
-            this.innerHTML = '';
-            const input = document.createElement('input');
-            input.type = 'date';
-            input.value = isoDate;
-            input.addEventListener('blur', () => saveCellData(this, input.value, originalValue));
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') this.innerHTML = originalValue; });
-            this.appendChild(input);
-            input.focus();
-        }
-
-        function saveCellData(cell, newISOValue, originalText) {
-            const newDisplayText = newISOValue ? toLocaleDate(newISOValue) : '';
-            if (newDisplayText === originalText) {
-                cell.innerHTML = originalText;
-                return;
-            }
-            cell.innerHTML = newDisplayText;
-            const rowIndex = parseInt(cell.parentElement.getAttribute('data-row-index'));
-            const colIndex = parseInt(cell.getAttribute('data-col-index'));
-            updateDataAPI(rowIndex, colIndex, newDisplayText);
-        }
-
-        // --- INICIALIZAÇÃO ---
-        window.onload = loadData;
+        // Carrega o CSV quando a página for carregada
+        window.onload = loadCSV;
     </script>
 </body>
 </html>
